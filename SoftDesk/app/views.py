@@ -1,4 +1,4 @@
-from rest_framework.viewsets import ReadOnlyModelViewSet, ViewSet
+from rest_framework.viewsets import ModelViewSet, ViewSet
 from django.contrib.auth import authenticate, login, logout
 from app.models import Project
 from app.serializers import ProjectSerializer, SignupSerializer
@@ -13,7 +13,7 @@ class SignupViewSet(ViewSet):
         serializer = SignupSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            return Response({'username': user.username, 'first_name': user.first_name,
+            return Response({'id': user.pk, 'username': user.username, 'first_name': user.first_name,
                              'last_name': user.last_name, 'email': user.email})
         return Response(serializer.errors, status=400)
 
@@ -38,10 +38,19 @@ class LogoutViewSet(ViewSet):
         return Response({'message': 'Successfully logged out.'})
 
 
-class ProjectViewSet(ReadOnlyModelViewSet):
+class ProjectViewSet(ModelViewSet):
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         queryset = Project.objects.filter(author_user=self.request.user)
         return queryset
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(author_user=self.request.user)
+        return Response(serializer.data, status=201)
+
+
+
