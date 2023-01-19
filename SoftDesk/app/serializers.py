@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
-from app.models import Project
+from app.models import Project, Contributor, Issue
 from django.contrib.auth import get_user_model
 
 
@@ -37,12 +37,42 @@ class SignupSerializer(serializers.ModelSerializer):
         return user
 
 
-class ProjectSerializer(ModelSerializer):
+class ProjectListSerializer(ModelSerializer):
 
     class Meta:
         model = Project
         fields = ['id', 'title', 'description', 'type', 'author_user']
         read_only_fields = ('author_user',)
+
+
+class ProjectDetailSerializer(ModelSerializer):
+    issues = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Project
+        fields = ['id', 'title', 'description', 'type', 'author_user', 'issues']
+        read_only_fields = ('author_user',)
+
+    @staticmethod
+    def get_issues(instance):
+        queryset = Issue.objects.filter(project_id=instance.id)
+        serializer = IssueSerializer(queryset, many=True)
+        return serializer.data
+
+
+class ContributorSerializer(ModelSerializer):
+
+    class Meta:
+        model = Contributor
+        fields = ['id', 'user', 'permission', 'role']
+
+
+class IssueSerializer(ModelSerializer):
+
+    class Meta:
+        model = Issue
+        fields = ['id', 'time_created', 'title', 'description', 'tag', 'priority', 'status', 'author_user',
+                  'assignee_user']
 
 
 
