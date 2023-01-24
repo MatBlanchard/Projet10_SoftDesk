@@ -1,9 +1,9 @@
 from django.db.models import Q
 from rest_framework.viewsets import ModelViewSet, ViewSet
-from app.models import Project, Contributor, Issue
+from app.models import Project, Contributor, Issue, Comment
 from app.permissions import IsProjectAuthor
 from app.serializers import SignupSerializer, ProjectListSerializer, ProjectDetailSerializer, ContributorSerializer, \
-    IssueSerializer
+    IssueListSerializer, IssueDetailSerializer, CommentSerializer
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -45,7 +45,7 @@ class ProjectViewSet(MultipleSerializerMixin, ModelViewSet):
         return Response(serializer.data, status=201)
 
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
+        partial = kwargs.pop('partial', True)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
@@ -78,8 +78,9 @@ class ContributorsViewSet(ModelViewSet):
         return Response(status=204)
 
 
-class IssuesViewSet(ModelViewSet):
-    serializer_class = IssueSerializer
+class IssuesViewSet(MultipleSerializerMixin, ModelViewSet):
+    serializer_class = IssueListSerializer
+    detail_serializer_class = IssueDetailSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
@@ -89,8 +90,49 @@ class IssuesViewSet(ModelViewSet):
         project = Project.objects.get(id=self.kwargs['projects_pk'])
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(project=project)
+        serializer.save(project=project, author_user=self.request.user)
         return Response(serializer.data, status=201)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', True)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data, status=200)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=204)
+
+
+class CommentsViewSet(ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Comment.objects.filter(issue_id=self.kwargs['issues_pk'])
+
+    def create(self, request, *args, **kwargs):
+        issue = Issue.objects.get(id=self.kwargs['issues_pk'])
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(issue=issue, author_user=self.request.user)
+        return Response(serializer.data, status=201)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', True)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data, status=200)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=204)
 
 
 

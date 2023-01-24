@@ -14,12 +14,18 @@ class Project(models.Model):
     author_user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
                                     related_name='author_projects')
 
+    def __str__(self):
+        return self.title
+
 
 class Contributor(models.Model):
     user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     project = models.ForeignKey(to=Project, on_delete=models.CASCADE, related_name='contributors')
     permission = models.CharField(max_length=255, choices=PERMISSIONS_CHOICES)
     role = models.CharField(max_length=255)
+
+    class Meta:
+        unique_together = ('project_id', 'user_id')
 
 
 class Issue(models.Model):
@@ -34,6 +40,9 @@ class Issue(models.Model):
     assignee_user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
                                       related_name='assignee_issues')
     time_created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
 
 
 class Comment(models.Model):
