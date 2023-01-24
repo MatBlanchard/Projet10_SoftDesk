@@ -1,4 +1,4 @@
-# # OpenClassrooms: Projet 10 - SoftDesk
+# OpenClassrooms: Projet 10 - SoftDesk
 Projet réalisé dans le cadre de ma formation OpenClassrooms Développeur d'Applications Python.  
 Il s'agit d'une API réalisée avec Django pour une société fictive, SoftDesk.  
 L'application permet de remonter et suivre des problèmes techniques.
