@@ -1,11 +1,6 @@
 from django.conf import settings
 from django.db import models
 
-PERMISSIONS_CHOICES = (
-    ("author", "author"),
-    ("contributor", "contributor"),
-)
-
 
 class Project(models.Model):
     title = models.CharField(max_length=255)
@@ -19,6 +14,11 @@ class Project(models.Model):
 
 
 class Contributor(models.Model):
+    PERMISSIONS_CHOICES = (
+        ('author', 'author'),
+        ('contributor', 'contributor'),
+    )
+
     user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     project = models.ForeignKey(to=Project, on_delete=models.CASCADE, related_name='contributors')
     permission = models.CharField(max_length=255, choices=PERMISSIONS_CHOICES)
@@ -29,12 +29,30 @@ class Contributor(models.Model):
 
 
 class Issue(models.Model):
+    STATUS_CHOICES = (
+        ('to-do', 'to-do'),
+        ('work-in-progress', 'work-in-progress'),
+        ('solved', 'solved')
+    )
+
+    TAG_CHOICES = (
+        ('bug', 'bug'),
+        ('improvement', 'improvement'),
+        ('task', 'task')
+    )
+
+    PRIORITY_CHOICES = (
+        ('low', 'low'),
+        ('medium', 'medium'),
+        ('high', 'high')
+    )
+
     title = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
-    tag = models.CharField(max_length=255)
+    tag = models.CharField(max_length=255, choices=TAG_CHOICES)
     priority = models.CharField(max_length=255)
     project = models.ForeignKey(to=Project, on_delete=models.CASCADE, related_name='issues')
-    status = models.CharField(max_length=255)
+    status = models.CharField(max_length=255, choices=STATUS_CHOICES)
     author_user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
                                     related_name='author_issues')
     assignee_user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE,

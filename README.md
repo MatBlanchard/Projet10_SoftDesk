@@ -3,7 +3,7 @@ Projet réalisé dans le cadre de ma formation OpenClassrooms Développeur d'App
 Il s'agit d'une API réalisée avec Django pour une société fictive, SoftDesk.  
 L'application permet de remonter et suivre des problèmes techniques.
 ## Documentation
-Tout les endpoints, leurs détails ainsi que des exemples d'utilisation sont décrits dans la [documentation]().
+Tout les endpoints, leurs détails ainsi que des exemples d'utilisation sont décrits dans la [documentation](https://documenter.getpostman.com/view/25251122/2s8ZDbXMGq).
 ## Installation et lancement
 Commencez tout d'abord par installer Python.
 
@@ -26,9 +26,17 @@ Installez ensuite les packages :
 ```
 pip install -r requirements.txt
 ```
+Effectuez les migrations :
+```
+python manage.py makemigrations
+```
+Puis :
+```
+python manage.py migrate
+```
 Il ne vous reste plus qu'à lancer le serveur : 
 ```
-python manage.py runserver
+python SoftDesk\manage.py runserver
 ```
 Vous pouvez ensuite utiliser l'applicaton via les différents endpoints décrits dans la documentation. 
 Vous devez d'abord créer un compte utilisateur à l'endpoint http://127.0.0.1:800/api/signup/ afin d'accéder aux fonctionnalités de l'application.

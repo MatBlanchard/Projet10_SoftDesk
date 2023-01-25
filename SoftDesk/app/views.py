@@ -1,7 +1,9 @@
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 from django.db.models import Q
 from rest_framework.viewsets import ModelViewSet, ViewSet
 from app.models import Project, Contributor, Issue, Comment
-from app.permissions import IsProjectAuthor
+from app.permissions import ProjectPermission, ContributorPermission, IssuePermission
 from app.serializers import SignupSerializer, ProjectListSerializer, ProjectDetailSerializer, ContributorSerializer, \
     IssueListSerializer, IssueDetailSerializer, CommentSerializer
 from rest_framework.response import Response
@@ -31,7 +33,7 @@ class SignupViewSet(ViewSet):
 class ProjectViewSet(MultipleSerializerMixin, ModelViewSet):
     serializer_class = ProjectListSerializer
     detail_serializer_class = ProjectDetailSerializer
-    permission_classes = [IsAuthenticated, IsProjectAuthor]
+    permission_classes = [ProjectPermission]
 
     def get_queryset(self):
         queryset = Project.objects.filter(Q(author_user=self.request.user) |
@@ -60,13 +62,16 @@ class ProjectViewSet(MultipleSerializerMixin, ModelViewSet):
 
 class ContributorsViewSet(ModelViewSet):
     serializer_class = ContributorSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ContributorPermission]
 
     def get_queryset(self):
         return Contributor.objects.filter(project_id=self.kwargs['projects_pk'])
 
     def create(self, request, *args, **kwargs):
-        project = Project.objects.get(id=self.kwargs['projects_pk'])
+        try:
+            project = Project.objects.get(id=self.kwargs['projects_pk'])
+        except ObjectDoesNotExist:
+            return Response(status=404)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(project=project)
@@ -81,7 +86,7 @@ class ContributorsViewSet(ModelViewSet):
 class IssuesViewSet(MultipleSerializerMixin, ModelViewSet):
     serializer_class = IssueListSerializer
     detail_serializer_class = IssueDetailSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IssuePermission]
 
     def get_queryset(self):
         return Issue.objects.filter(project_id=self.kwargs['projects_pk'])
