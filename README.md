@@ -26,14 +26,6 @@ Installez ensuite les packages :
 ```
 pip install -r requirements.txt
 ```
-Effectuez les migrations :
-```
-python manage.py makemigrations
-```
-Puis :
-```
-python manage.py migrate
-```
 Il ne vous reste plus qu'à lancer le serveur : 
 ```
 python SoftDesk\manage.py runserver
