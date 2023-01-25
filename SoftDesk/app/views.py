@@ -3,7 +3,7 @@ from django.db import transaction
 from django.db.models import Q
 from rest_framework.viewsets import ModelViewSet, ViewSet
 from app.models import Project, Contributor, Issue, Comment
-from app.permissions import ProjectPermission, ContributorPermission, IssuePermission
+from app.permissions import ProjectPermission, ContributorPermission, IssuePermission, CommentPermission
 from app.serializers import SignupSerializer, ProjectListSerializer, ProjectDetailSerializer, ContributorSerializer, \
     IssueListSerializer, IssueDetailSerializer, CommentSerializer
 from rest_framework.response import Response
@@ -114,7 +114,7 @@ class IssuesViewSet(MultipleSerializerMixin, ModelViewSet):
 
 class CommentsViewSet(ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CommentPermission]
 
     def get_queryset(self):
         return Comment.objects.filter(issue_id=self.kwargs['issues_pk'])
