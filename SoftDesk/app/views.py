@@ -72,6 +72,8 @@ class ContributorsViewSet(ModelViewSet):
             project = Project.objects.get(id=self.kwargs['projects_pk'])
         except ObjectDoesNotExist:
             return Response(status=404)
+        if project.contributors.filter(user_id=request.data['user']).exists():
+            return Response(status=403)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(project=project)
